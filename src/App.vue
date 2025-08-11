@@ -5,8 +5,8 @@ import HistoryList from "./components/HistoryList.vue";
 import WeatherResults from "./components/WeatherResults.vue";
 
 // data
-const currentView = ref("results"); // "home" or "results"
-const searchHistory = reactive([]); // array of objects
+const currentView = ref("home"); // "home" or "results"
+const searchHistory = reactive(["hi"]); // array of objects
 let currentWeather = reactive({}); // for the parsed .json object with .data as property
 const loading = ref();
 const error = ref();
