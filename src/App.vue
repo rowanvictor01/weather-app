@@ -1,11 +1,29 @@
-<script setup></script>
+<script setup>
+import { ref, reactive, computed } from "vue";
+import SearchBar from "./components/SearchBar.vue";
+import HistoryList from "./components/HistoryList.vue";
+import WeatherResults from "./components/WeatherResults.vue";
+
+// data
+const currentView = ref("results"); // "home" or "results"
+const searchHistory = reactive([]); // array of objects
+let currentWeather = reactive({}); // for the parsed .json object with .data as property
+const loading = ref();
+const error = ref();
+
+// methods
+</script>
 
 <template>
-  <h1>You did it!</h1>
-  <p>
-    Visit <a href="https://vuejs.org/" target="_blank" rel="noopener">vuejs.org</a> to read the
-    documentation
-  </p>
-</template>
+  <section>
+    <SearchBar />
+  </section>
 
-<style scoped></style>
+  <section v-if="currentView === 'home'">
+    <HistoryList :historyList="searchHistory" />
+  </section>
+
+  <section v-else-if="currentView === 'results'">
+    <WeatherResults />
+  </section>
+</template>
