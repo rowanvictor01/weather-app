@@ -93,10 +93,10 @@ function getWeatherData(city) {
 function extractDays(data) {
   const fiveDayForecast = [];
 
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < data.list.length; i += 8) {
     const forecastReport = {
       day: convertDate(data.list[i]["dt_txt"]),
-      conditionIcon: data.list[i].weather[i],
+      conditionIcon: data.list[i].weather[0].icon,
       temperature: data.list[i].main["feels_like"],
     };
 
@@ -124,6 +124,8 @@ function convertDate(dtTxt) {
       return "Thursday";
     case 5:
       return "Friday";
+    case 6:
+      return "Saturday";
   }
 }
 
