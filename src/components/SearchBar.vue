@@ -1,8 +1,24 @@
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+
+// emits
+const emit = defineEmits(["input-city"]);
+
+// data
+const cityName = ref("");
+
+// methods
+function onCitySearch() {
+  emit("input-city", cityName.value);
+
+  cityName.value = "";
+}
+</script>
 
 <template>
   <section>
     <form
+      @submit.prevent="onCitySearch"
       class="relative border rounded-2xl w-[clamp(296px,70%,512px)] mx-auto mt-6 text-center"
     >
       <button
@@ -13,6 +29,7 @@
       </button>
 
       <input
+        v-model="cityName"
         type="text"
         placeholder="Search"
         class="my-0 mx-auto w-[clamp(236px,30%,472px)] py-3 text-center"
