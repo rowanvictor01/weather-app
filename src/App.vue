@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, computed } from "vue";
+import { ref, reactive, watch, computed } from "vue";
 import SearchBar from "./components/SearchBar.vue";
 import HistoryList from "./components/HistoryList.vue";
 import WeatherResults from "./components/WeatherResults.vue";
@@ -13,9 +13,6 @@ const historyItem = reactive({
   forecast: null,
 });
 
-let currentWeather = reactive({}); // for the parsed .json object with .data as property
-const forecastList = reactive([]);
-
 const currentState = reactive({
   isLoading: false,
   errorMsg: null,
@@ -24,6 +21,11 @@ const currentState = reactive({
 const forecastState = reactive({
   isLoading: false,
   errorMsg: null,
+});
+
+// computed properties
+const isLoadingDone = computed(() => {
+  return !currentState.isLoading && !forecastState.isLoading ? true : false;
 });
 
 // methods
@@ -51,7 +53,7 @@ function getWeatherData(city) {
   currentResponse
     .then((res) => res.json())
     .then((data) => {
-      currentWeather = {
+      const currentDayWeather = {
         name: data.name,
         country: data.sys.country,
         temperature: data.main.temp,
@@ -62,50 +64,46 @@ function getWeatherData(city) {
         feelsLike: data.main["feels_like"],
       };
 
-      historyItem.current = currentWeather;
+      historyItem.current = currentDayWeather;
     })
-    .catch((err) => console.error(err))
+    .catch((err) => {
+      currentState.errorMsg = err;
+      console.log(
+        "An error has occured on retrieving today's weather:",
+        currentState.errorMsg
+      );
+    })
     .finally(() => (currentState.isLoading = false));
 
   forecastResponse
     .then((res) => res.json())
     .then((data) => {
-      extractDays(data);
-
-      historyItem.forecast = forecastList;
+      historyItem.forecast = extractDays(data);
     })
-    .catch((err) => console.error(`An error has occured: ${err}`))
+    .catch((err) => {
+      forecastState.errorMsg = err;
+      console.log(
+        "An error has occured on retrieving this week's forecast:",
+        forecastState.errorMsg
+      );
+    })
     .finally(() => (forecastState.isLoading = false));
-
-  searchHistory.push(historyItem.current);
-
-  console.log(`5-day forecast: ${forecastList}`);
-  console.log(`Search History: ${searchHistory}`);
-
-  /*
-    Have written the code for fetching data, parsing unix date to day of the week,
-    and extracted five days from the list of days from the fetched data.
-    Using console.log to check the contents of the arrays but not printing expected values.
-
-    Check extractDays() function and check if it's working.
-    Also check searchHistory's contents and how items are being pushed.
-    
-    Items might not be getting pushed correctly.
-    
-    Check individual block sections.
-  */
 }
 
 function extractDays(data) {
+  const fiveDayForecast = [];
+
   for (let i = 0; i < 5; i++) {
     const forecastReport = {
       day: convertDate(data.list[i]["dt_txt"]),
-      condition: data.list[i].weather.icon,
+      conditionIcon: data.list[i].weather[i],
       temperature: data.list[i].main["feels_like"],
     };
 
-    forecastList.push(forecastReport);
+    fiveDayForecast.push(forecastReport);
   }
+
+  return fiveDayForecast;
 }
 
 function convertDate(dtTxt) {
@@ -128,6 +126,28 @@ function convertDate(dtTxt) {
       return "Friday";
   }
 }
+
+// watchers
+watch(historyItem, () => {
+  if (historyItem.current && historyItem.forecast) {
+    const copy = {
+      current: historyItem.current,
+      forecast: historyItem.forecast,
+    };
+
+    searchHistory.push(copy);
+
+    for (let i in historyItem) {
+      historyItem[i] = null;
+    }
+  }
+});
+
+watch(isLoadingDone, () => {
+  if (isLoadingDone) {
+    currentView.value = "results";
+  }
+});
 </script>
 
 <template>
