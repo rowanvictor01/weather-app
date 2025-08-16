@@ -2,7 +2,7 @@
 import { ref } from "vue";
 
 // emits
-const emit = defineEmits(["input-city"]);
+const emit = defineEmits(["input-city", "return-home"]);
 
 // data
 const cityName = ref("");
@@ -13,6 +13,10 @@ function onCitySearch() {
 
   cityName.value = "";
 }
+
+function onHomeBtnClick() {
+  emit("return-home");
+}
 </script>
 
 <template>
@@ -22,7 +26,8 @@ function onCitySearch() {
       class="relative border rounded-2xl w-[clamp(296px,70%,512px)] mx-auto mt-6 text-center"
     >
       <button
-        type="submit"
+        type="button"
+        @click="onHomeBtnClick"
         class="absolute left-2 top-2.5 w-[clamp(15px,30%,25px)] h-[clamp(15px,30%,25px)]"
       >
         <img src="../assets/icons/home.svg" alt="home icon" />
