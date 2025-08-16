@@ -28,7 +28,16 @@ const isLoadingDone = computed(() => {
   return !currentState.isLoading && !forecastState.isLoading ? true : false;
 });
 
+const latestSearch = computed(() => {
+  return searchHistory[searchHistory.length - 1];
+});
+
 // methods
+function setViewToHome() {
+  currentView.value = "home";
+  console.log(currentView.view);
+}
+
 function getWeatherData(city) {
   const sanitizedCity = city.toLowerCase().trim();
 
@@ -139,22 +148,18 @@ watch(historyItem, () => {
 
     searchHistory.push(copy);
 
+    currentView.value = "results";
+
     for (let i in historyItem) {
       historyItem[i] = null;
     }
-  }
-});
-
-watch(isLoadingDone, () => {
-  if (isLoadingDone) {
-    currentView.value = "results";
   }
 });
 </script>
 
 <template>
   <section>
-    <SearchBar @input-city="getWeatherData" />
+    <SearchBar @input-city="getWeatherData" @return-home="setViewToHome" />
   </section>
 
   <section v-if="currentView === 'home'">
@@ -162,6 +167,6 @@ watch(isLoadingDone, () => {
   </section>
 
   <section v-else-if="currentView === 'results'">
-    <WeatherResults />
+    <WeatherResults :results="latestSearch" />
   </section>
 </template>
